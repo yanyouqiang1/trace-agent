@@ -35,6 +35,11 @@ public class SimpleAgent {
                 // 通过类名获取CtClass对象
                 String dotClassName = className.replace('/', '.');
 
+                if (dotClassName.contains("org.yyq")){
+                    //过滤自己的包
+                    return classfileBuffer;
+                }
+
                 if (!Arrays.stream(packages).allMatch(pack -> dotClassName.contains(pack))) {
                     //不再增强包里面
                     return classfileBuffer;

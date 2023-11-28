@@ -110,7 +110,7 @@ public class FileHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("trace文件保存在：" + file.getPath());
+        System.out.println("trace文件保存在：" + file.getAbsolutePath());
         return file;
     }
 
