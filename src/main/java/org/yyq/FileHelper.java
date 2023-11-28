@@ -3,18 +3,21 @@ package org.yyq;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileHelper {
-    public static int LEVEL = 0;
+    public static final String FILE_SUFFIX = "trace.txt";
 
-    public static FileWriter fileWriter = null;
-
-    public static String FILEPATH = "trace.txt";
+    public static Map<String, FileInfo> fileInfoMap = new ConcurrentHashMap<>();
 
     public static void append(String content) {
-        FileWriter fw = getFileWriter();
+        FileInfo fileInfo = getFileInfo();
+
+        FileWriter fw = fileInfo.fileWriter;
+
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < LEVEL; i++) {
+        for (int i = 0; i < fileInfo.level; i++) {
             sb.append("\t");
         }
         sb.append(content);
@@ -29,8 +32,10 @@ public class FileHelper {
     }
 
     public static void incLevel() {
-        LEVEL++;
-        FileWriter fw = getFileWriter();
+        FileInfo fileInfo = getFileInfo();
+        fileInfo.level = fileInfo.level + 1;
+
+        FileWriter fw = fileInfo.fileWriter;
         try {
             fw.write("\n");
             fw.flush();
@@ -40,34 +45,44 @@ public class FileHelper {
     }
 
     public static void decLevel() {
-        LEVEL--;
+        FileInfo fileInfo = getFileInfo();
+        fileInfo.level = fileInfo.level - 1;
     }
 
     public static void clear() {
-        LEVEL = 0;
-        if (fileWriter != null) {
+        fileInfoMap.values().forEach(fileInfo -> {
             try {
-                fileWriter.close();
+                fileInfo.level = 0;
+                if (fileInfo.fileWriter != null) {
+                    fileInfo.fileWriter.close();
+                    fileInfo.fileWriter = null;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        fileInfoMap.clear();
+    }
+
+    /**
+     * 获取，没有就初始化
+     *
+     * @return
+     */
+    private static FileInfo getFileInfo() {
+        String key = Thread.currentThread().getName();
+        FileInfo fileInfo = fileInfoMap.get(key);
+        if (fileInfo == null) {
+            try {
+                File file = getFile();
+                fileInfo = new FileInfo(new FileWriter(file), 0);
+                fileInfoMap.put(key, fileInfo);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        fileWriter = null;
+        return fileInfo;
     }
-
-
-    private static FileWriter getFileWriter() {
-        if (fileWriter == null) {
-            File file = getFile();
-            try {
-                fileWriter = new FileWriter(file);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return fileWriter;
-    }
-
 
     /**
      * 返回文件，文件存在则清空
@@ -75,7 +90,8 @@ public class FileHelper {
      * @return
      */
     private static File getFile() {
-        File file = new File(FILEPATH);
+        String filepath = Thread.currentThread().getName() + "_" + FILE_SUFFIX;
+        File file = new File(filepath);
         try {
             if (file.exists()) {
                 // 清空文件内容
@@ -96,5 +112,16 @@ public class FileHelper {
         }
         System.out.println("trace文件保存在：" + file.getPath());
         return file;
+    }
+
+
+    static class FileInfo {
+        FileWriter fileWriter;
+        int level;
+
+        public FileInfo(FileWriter fileWriter, int level) {
+            this.fileWriter = fileWriter;
+            this.level = level;
+        }
     }
 }
