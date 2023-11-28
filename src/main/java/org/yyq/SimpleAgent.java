@@ -52,8 +52,8 @@ public class SimpleAgent {
                         String params = Arrays.stream(ctMethod.getParameterTypes()).map(ct -> ct.getSimpleName()).collect(Collectors.joining(","));
                         stringBuilder.append("(").append(params).append(")");
                         stringBuilder.append("(").append(ctClass.getName()).append(".java").append(":").append(ctMethod.getMethodInfo().getLineNumber(0)).append(")");
-                        ctMethod.insertBefore("com.my.FileHelper.append(\"" + stringBuilder.toString() + "\");com.my.FileHelper.incLevel();");
-                        ctMethod.insertAfter("com.my.FileHelper.decLevel();");
+                        ctMethod.insertBefore("org.yyq.FileHelper.append(\"" + stringBuilder.toString() + "\");org.yyq.FileHelper.incLevel();");
+                        ctMethod.insertAfter("org.yyq.FileHelper.decLevel();");
                     }
                     // 返回修改后的字节码
                     return ctClass.toBytecode();
