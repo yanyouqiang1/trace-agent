@@ -20,6 +20,16 @@ com.xx 是你要监控的包名。 可以是多个用逗号分割，如
 # 四、观察
 日志会输出文件保存的位置
 
+```text
+org.ClientTest.main(String[])(org.ClientTest.java:8)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+org.ClientTest$Person.saySomething()(org.ClientTest$Person.java:33)
+```
+
 
 
 

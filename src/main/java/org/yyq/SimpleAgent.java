@@ -10,6 +10,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class SimpleAgent {
@@ -35,22 +36,32 @@ public class SimpleAgent {
                 // 通过类名获取CtClass对象
                 String dotClassName = className.replace('/', '.');
 
-                if (dotClassName.contains("org.yyq")){
+                if (dotClassName.contains("org.yyq")) {
                     //过滤自己的包
                     return classfileBuffer;
                 }
-
-                if (!Arrays.stream(packages).allMatch(pack -> dotClassName.contains(pack))) {
-                    //不再增强包里面
+                //过滤一些cglib，proxy动态代理的类
+                List<String> proxiedClassName = Arrays.asList("$$EnhancerByCGLIB", "$Proxy");
+                if (proxiedClassName.stream().anyMatch(s -> dotClassName.contains(s))) {
+                    return classfileBuffer;
+                }
+                //不再增强包路径里面
+                if (!Arrays.stream(packages).anyMatch(pack -> dotClassName.contains(pack))) {
                     return classfileBuffer;
                 }
                 try {
                     CtClass ctClass = classPool.get(dotClassName);
                     // 遍历所有方法
                     for (CtMethod ctMethod : ctClass.getDeclaredMethods()) {
+                        //空method过滤
                         if (ctMethod.isEmpty()) {
                             continue;
                         }
+                        //常见一些get set 没什么意义的方法过滤
+                        if (ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) {
+                            continue;
+                        }
+
                         // 在方法前后添加打印日志的代码
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append(ctClass.getName()).append(".").append(ctMethod.getName());
