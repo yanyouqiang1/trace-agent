@@ -17,9 +17,7 @@ public class FileHelper {
         FileWriter fw = fileInfo.fileWriter;
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fileInfo.level; i++) {
-            sb.append("\t");
-        }
+
         sb.append(content);
 //
 //        sb.append("(").append(fileName).append(":").append(lineNumber).append(")");
@@ -33,8 +31,6 @@ public class FileHelper {
 
     public static void incLevel() {
         FileInfo fileInfo = getFileInfo();
-        fileInfo.level = fileInfo.level + 1;
-
         FileWriter fw = fileInfo.fileWriter;
         try {
             fw.write("\n");
@@ -44,15 +40,9 @@ public class FileHelper {
         }
     }
 
-    public static void decLevel() {
-        FileInfo fileInfo = getFileInfo();
-        fileInfo.level = fileInfo.level - 1;
-    }
-
     public static void clear() {
         fileInfoMap.values().forEach(fileInfo -> {
             try {
-                fileInfo.level = 0;
                 if (fileInfo.fileWriter != null) {
                     fileInfo.fileWriter.close();
                     fileInfo.fileWriter = null;
@@ -75,7 +65,7 @@ public class FileHelper {
         if (fileInfo == null) {
             try {
                 File file = getFile();
-                fileInfo = new FileInfo(new FileWriter(file), 0);
+                fileInfo = new FileInfo(new FileWriter(file));
                 fileInfoMap.put(key, fileInfo);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -117,11 +107,9 @@ public class FileHelper {
 
     static class FileInfo {
         FileWriter fileWriter;
-        int level;
 
-        public FileInfo(FileWriter fileWriter, int level) {
+        public FileInfo(FileWriter fileWriter) {
             this.fileWriter = fileWriter;
-            this.level = level;
         }
     }
 }

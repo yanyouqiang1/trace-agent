@@ -58,7 +58,6 @@ public class SimpleAgent {
                         stringBuilder.append("(").append(params).append(")");
                         stringBuilder.append("(").append(ctClass.getName()).append(".java").append(":").append(ctMethod.getMethodInfo().getLineNumber(0)).append(")");
                         ctMethod.insertBefore("org.yyq.FileHelper.append(\"" + stringBuilder.toString() + "\");org.yyq.FileHelper.incLevel();");
-                        ctMethod.insertAfter("org.yyq.FileHelper.decLevel();");
                     }
                     // 返回修改后的字节码
                     return ctClass.toBytecode();
